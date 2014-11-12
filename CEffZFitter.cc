@@ -75,7 +75,7 @@ CEffZFitter::~CEffZFitter()
 void CEffZFitter::initialize(const std::string conf, const int sigpass, const int bkgpass, const int sigfail, const int bkgfail,
                              const std::string infname, const std::string outdir, const std::string temfname,
                              const double massLo, const double massHi, const double fitMassLo, const double fitMassHi, 
-		             const int uncMethod, const std::string pufname, const int charge,
+		             const int uncMethod, const int doMC, const int charge,
 			     const unsigned int runNumLo, const unsigned int runNumHi)
 {
   std::cout << "   [CEffZFitter] Initializing... " << std::endl;
@@ -93,16 +93,16 @@ void CEffZFitter::initialize(const std::string conf, const int sigpass, const in
   gSystem->mkdir(fOutputDir.c_str(),true);
   CPlot::sOutDir = TString(outdir.c_str()) + TString("/plots");
       
-  TFile *pufile=0;
-  TH1D *puWeights=0;
-  if(pufname.compare("none")!=0) {
-    pufile = new TFile(pufname.c_str());      assert(pufile);
-    puWeights = (TH1D*)pufile->Get("pileup"); assert(puWeights); 
-  }
+  //TFile *pufile=0;
+  //TH1D *puWeights=0;
+  //if(pufname.compare("none")!=0) {
+  //  pufile = new TFile(pufname.c_str());      assert(pufile);
+  //  puWeights = (TH1D*)pufile->Get("pileup"); assert(puWeights); 
+  //}
   
   // generate templates from MC if necessary
   if(fSigPass==2 || fSigFail==2) {
-    makeBinnedTemplates(temfname, charge, puWeights);
+    makeBinnedTemplates(temfname, charge);
   } else if(fSigPass==4 || fSigFail==4) {
     makeUnbinnedTemplates(temfname, charge);
   }
@@ -124,7 +124,12 @@ void CEffZFitter::initialize(const std::string conf, const int sigpass, const in
   
   TFile *infile = new TFile(infname.c_str());    assert(infile);
   //TTree *intree = (TTree*)infile->Get("Events"); assert(intree);
-  TTree *intree = (TTree*)infile->Get("tnpTree_DATA"); assert(intree);
+  TTree *intree = 0;
+  if(doMC){
+    intree = (TTree*)infile->Get("tnpTree_DYToEE"); assert(intree);
+  }else{
+    intree = (TTree*)infile->Get("tnpTree_DATA"); assert(intree);
+  }
   intree->SetBranchAddress("runNum",   &runNum);
   intree->SetBranchAddress("lumiSec",  &lumiSec);
   intree->SetBranchAddress("evtNum",   &evtNum);
@@ -244,9 +249,9 @@ void CEffZFitter::initialize(const std::string conf, const int sigpass, const in
     if(runNum > runNumHi) continue;
 
     wgt = scale1fb;
-    if(puWeights) {
-      wgt *= puWeights->GetBinContent(puWeights->FindBin(npu));
-    }
+    //if(puWeights) {
+    //  wgt *= puWeights->GetBinContent(puWeights->FindBin(npu));
+    //}
     
     //
     // Find bin indices
@@ -312,8 +317,8 @@ void CEffZFitter::initialize(const std::string conf, const int sigpass, const in
   delete infile;
   infile=0, intree=0;
   
-  delete pufile;
-  pufile=0, puWeights=0;
+  //delete pufile;
+  //pufile=0, puWeights=0;
   
   fIsInitialized = true;
 }
@@ -520,7 +525,7 @@ void CEffZFitter::parseConf(const std::string conf)
 }
 
 //--------------------------------------------------------------------------------------------------
-void CEffZFitter::makeBinnedTemplates(const std::string temfname, const int charge, TH1D *puWeights)
+void CEffZFitter::makeBinnedTemplates(const std::string temfname, const int charge)
 {
   std::cout << "   [CEffZFitter] Creating binned templates... "; std::cout.flush();
 
@@ -607,7 +612,8 @@ void CEffZFitter::makeBinnedTemplates(const std::string temfname, const int char
   TLorentzVector *tag=0, *probe=0;        // tag, probe 4-vector
   
   TFile *infile = new TFile(temfname.c_str());   assert(infile);
-  TTree *intree = (TTree*)infile->Get("Events"); assert(intree);
+  //TTree *intree = (TTree*)infile->Get("Events"); assert(intree);
+  TTree *intree = (TTree*)infile->Get("tnpTree_DYToEE"); assert(intree);
   intree->SetBranchAddress("runNum",   &runNum);
   intree->SetBranchAddress("lumiSec",  &lumiSec);
   intree->SetBranchAddress("evtNum",   &evtNum);
@@ -625,8 +631,8 @@ void CEffZFitter::makeBinnedTemplates(const std::string temfname, const int char
     intree->GetEntry(ientry);
     
     double puWgt = scale1fb;
-    if(puWeights)
-      puWgt *= puWeights->GetBinContent(puWeights->FindBin(npu));
+    //if(puWeights)
+    //  puWgt *= puWeights->GetBinContent(puWeights->FindBin(npu));
     
     if(qprobe*charge < 0) continue;
     
@@ -1388,7 +1394,7 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
                              RooFit::Extended(),
                              RooFit::Strategy(2),
                              RooFit::Minos(RooArgSet(eff)),
-                             RooFit::NumCPU(4),
+                             RooFit::NumCPU(6),
                              RooFit::Save());
  
   // Refit w/o MINOS if MINOS errors are strange...

@@ -50,4 +50,5 @@ NOOBDIR=/tthome/bpollack/CMSSW_6_1_1/src/HZG_Analyzer/HiggsZGAnalyzer/tnpFiles
 #./effZFit elsel.bins 0 0 0 0 ${BACONBITSDIR}/Summer12_DYJetsToLL_M-50_TuneZ2Star_elselbits.root elsel_mc   1 0 none
 #./effZFit elsel.bins 2 1 2 2 ${BACONBITSDIR}/SingleElectron_2012-22Jan2013_elselbits.root       elsel_data 0 0 ${BACONBITSDIR}/Summer12_DYJetsToLL_M-50_TuneZ2Star_elselbits.root
 
-./effZFit sel.bins 0 0 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_11-11-14_ID.root elsel_data 0 0 none 
+#./effZFit sel.bins 0 0 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_11-11-14_ID.root elsel_MC 1 0 none 
+./effZFit sel.bins 2 1 2 2 ${NOOBDIR}/tnpFile_EE2012ABCD_11-11-14_ID.root elsel_data 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_11-11-14_ID.root

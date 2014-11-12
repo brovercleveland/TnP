@@ -44,7 +44,7 @@ public:
   void initialize(const std::string conf, const int sigpass, const int bkgpass, const int sigfail, const int bkgfail,
                   const std::string infname, const std::string outdir, const std::string temfname,
                   const double massLo, const double massHi, const double fitMassLo, const double fitMassHi, 
-		  const int uncMethod, const std::string pufname, const int charge,
+		  const int uncMethod, const int doMC, const int charge,
 		  const unsigned int runNumLo, const unsigned int runNumHi); 
   
   void computeEff();
@@ -56,7 +56,7 @@ protected:
   void parseConf(const std::string conf);
   
   // generate MC-based signal templates
-  void makeBinnedTemplates(const std::string temfname, const int charge, TH1D *puWeights);
+  void makeBinnedTemplates(const std::string temfname, const int charge);
   void makeUnbinnedTemplates(const std::string temfname, const int charge);
   
   // make efficiency graph

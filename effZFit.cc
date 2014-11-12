@@ -20,7 +20,7 @@ int main(int argc, char **argv)
   const int         bkgfail  = atoi(argv[5]);	// background model for FAIL sample
   const std::string infname  = argv[6];         // input ROOT file of probes
   const std::string outdir   = argv[7];         // output directory
-  const int         doPU     = atoi(argv[8]);	// PU re-weighting mode
+  const int         doMC     = atoi(argv[8]);	// 1 if MC 
   const int         charge   = atoi(argv[9]);	// probe charge requirement (0, -1, +1)
   const std::string temfname = argv[10];        // ROOT file for generating MC-based templates
   
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
   const double       fitMassLo = massLo;
   const double       fitMassHi = massHi;
   const int          uncMethod = 0;
-  const std::string  pufname   = doPU ? "PUWeights_2012.root" : "none";
+  //const std::string  pufname   = doPU ? "PUWeights_2012.root" : "none";
   const unsigned int runNumLo  = 0;
   const unsigned int runNumHi  = 999999;
   
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
   fitter.initialize(conf, sigpass, bkgpass, sigfail, bkgfail,
                     infname, outdir, temfname,
                     massLo, massHi, fitMassLo, fitMassHi, 
-		    uncMethod, pufname, charge, runNumLo, runNumHi);
+		    uncMethod, doMC, charge, runNumLo, runNumHi);
   fitter.computeEff();
   
 
