@@ -358,7 +358,7 @@ void CEffZFitter::computeEff()
   if(fDoEta)    { grEffEta = makeEffGraph(fEtaBinEdgesv, fPassTreeEtav, fFailTreeEtav, "eta"); }
   if(fDoPhi)    { grEffPhi = makeEffGraph(fPhiBinEdgesv, fPassTreePhiv, fFailTreePhiv, "phi"); }
   if(fDoNPV)    { grEffNPV = makeEffGraph(fNPVBinEdgesv, fPassTreeNPVv, fFailTreeNPVv, "npv"); }
-  if(fDoEtaPt)  { makeEffHist2D(hEffEtaPt, hErrlEtaPt, hErrhEtaPt, fPassTreeEtaPtv, fFailTreeEtaPtv, "etapt"); }
+  if(fDoEtaPt)  { makeEffHist2D(hEffEtaPt, hErrlEtaPt, hErrhEtaPt, fPassTreeEtaPtv, fFailTreeEtaPtv, "etapt"); cout<<"testing"<<endl;}
   if(fDoEtaPhi) { makeEffHist2D(hEffEtaPhi, hErrlEtaPhi, hErrhEtaPhi, fPassTreeEtaPhiv, fFailTreeEtaPhiv, "etaphi"); }
   
   //------------------------------------------------------------------------------------------------
@@ -1053,10 +1053,6 @@ void CEffZFitter::makeEffHist2D(TH2D *hEff, TH2D *hErrl, TH2D *hErrh,
                      passv[ibin], failv[ibin],
                      name, cpass, cfail);
       
-        hEff ->SetCellContent(ix+1, iy+1, eff);
-        hErrl->SetCellContent(ix+1, iy+1, errl);
-        hErrh->SetCellContent(ix+1, iy+1, errh);
-
       } else {  // Fit Z peak
         ifstream rfile;
         char rname[100];
@@ -1076,6 +1072,10 @@ void CEffZFitter::makeEffHist2D(TH2D *hEff, TH2D *hErrl, TH2D *hErrh,
                      name, cpass, cfail);
         }
       }
+
+      hEff ->SetCellContent(ix+1, iy+1, eff);
+      hErrl->SetCellContent(ix+1, iy+1, errl);
+      hErrh->SetCellContent(ix+1, iy+1, errh);
     }    
   }  
   delete cpass;
@@ -1341,9 +1341,21 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
   
   } else if(fBkgFail==2) {
     bkgModFail = new CErfcExpo(m,false);
+    //ID and Iso
+    if(ibin==0) {
+      ((CErfcExpo*)bkgModFail)->alfa->setVal(55);
+    }
     if(ibin==23 || ibin ==24) {
       ((CErfcExpo*)bkgModFail)->gamma->setMin(-1.0);
     }
+    //Iso
+    if(ibin==11 || ibin ==14) {
+      ((CErfcExpo*)bkgModFail)->alfa->setVal(75);
+    }
+    //Iso
+    //if(ibin==17) {
+    //  ((CErfcExpo*)bkgModFail)->alfa->setVal(61);
+   // }
 
   } else if(fBkgFail==3) {
     bkgModFail = new CDoubleExp(m,false);
