@@ -89,11 +89,11 @@ CErfcExpo::CErfcExpo(RooRealVar &m, const Bool_t pass)
   char vname[50];
   
   if(pass) {
-    sprintf(vname,"alfa%s",name);  alfa  = new RooRealVar(vname,vname,50,5,200);
+    sprintf(vname,"alfa%s",name);  alfa  = new RooRealVar(vname,vname,65,50,85);
     sprintf(vname,"beta%s",name);  beta  = new RooRealVar(vname,vname,0.05,0,0.2);
     sprintf(vname,"gamma%s",name); gamma = new RooRealVar(vname,vname,0.1,0,1);
   } else {
-    sprintf(vname,"alfa%s",name);  alfa  = new RooRealVar(vname,vname,50,5,200);
+    sprintf(vname,"alfa%s",name);  alfa  = new RooRealVar(vname,vname,60,50,80);
     sprintf(vname,"beta%s",name);  beta  = new RooRealVar(vname,vname,0.05,0,0.2);
     sprintf(vname,"gamma%s",name); gamma = new RooRealVar(vname,vname,0.1,0,1);
   }  

@@ -28,8 +28,8 @@
 #include "RooExtendPdf.h"
 
 // bin size constants
-#define BIN_SIZE_PASS 2
-#define BIN_SIZE_FAIL 2
+#define BIN_SIZE_PASS 1
+#define BIN_SIZE_FAIL 1
 
 //--------------------------------------------------------------------------------------------------
 CEffZFitter::CEffZFitter():
@@ -1341,6 +1341,9 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
   
   } else if(fBkgFail==2) {
     bkgModFail = new CErfcExpo(m,false);
+    if(ibin==23 || ibin ==24) {
+      ((CErfcExpo*)bkgModFail)->gamma->setMin(-1.0);
+    }
 
   } else if(fBkgFail==3) {
     bkgModFail = new CDoubleExp(m,false);
@@ -1399,7 +1402,7 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
  
   // Refit w/o MINOS if MINOS errors are strange...
   if((fabs(eff.getErrorLo())<5e-5) || (eff.getErrorHi()<5e-5))
-    fitResult = totalPdf.fitTo(*dataCombined, RooFit::Extended(), RooFit::Strategy(1), RooFit::Save());
+    fitResult = totalPdf.fitTo(*dataCombined, RooFit::Extended(), RooFit::Strategy(2), RooFit::Save());
   
   resEff  = eff.getVal();
   resErrl = fabs(eff.getErrorLo());
@@ -1434,15 +1437,15 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
   sprintf(effstr,"#varepsilon = %.4f_{ -%.4f}^{ +%.4f}",eff.getVal(),fabs(eff.getErrorLo()),eff.getErrorHi());
 
   RooPlot *mframePass = m.frame(Bins(int(fFitMassHi-fFitMassLo)/BIN_SIZE_PASS));
-  dataPass->plotOn(mframePass,MarkerStyle(kFullCircle),MarkerSize(0.8),DrawOption("ZP"));    
-  modelPass->plotOn(mframePass);
+  dataPass->plotOn(mframePass,MarkerStyle(kFullCircle),MarkerSize(0.8),DrawOption("ZP"),Name("dataPass"));    
+  modelPass->plotOn(mframePass,Name("modelPass"));
   if(fBkgPass>0)   
     modelPass->plotOn(mframePass,Components("backgroundPass"),LineStyle(kDashed),LineColor(kRed));
 
   
   RooPlot *mframeFail = m.frame(Bins(int(fFitMassHi-fFitMassLo)/BIN_SIZE_FAIL));
-  dataFail->plotOn(mframeFail,MarkerStyle(kFullCircle),MarkerSize(0.8),DrawOption("ZP"));
-  modelFail->plotOn(mframeFail);
+  dataFail->plotOn(mframeFail,MarkerStyle(kFullCircle),MarkerSize(0.8),DrawOption("ZP"),Name("dataFail"));
+  modelFail->plotOn(mframeFail, Name("modelFail"));
   modelFail->plotOn(mframeFail,Components("backgroundFail"),LineStyle(kDashed),LineColor(kRed));
   
   //
@@ -1452,7 +1455,8 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
   sprintf(yield,"%u Events",(int)passTree->GetEntries());
   sprintf(ylabel,"Events / %.1f GeV",(double)BIN_SIZE_PASS);
   sprintf(nsigstr,"N_{sig} = %.1f #pm %.1f",NsigPass.getVal(),NsigPass.getPropagatedError(*fitResult));
-  sprintf(chi2str,"#chi^{2}/dof = %.3f",mframePass->chiSquare());
+  //sprintf(chi2str,"#chi^{2}/dof = %.3f",mframePass->chiSquare());
+  sprintf(chi2str,"#chi^{2}/dof = %.3f",mframePass->chiSquare("modelPass","dataPass",12));
   if(fBkgPass>0)
     sprintf(nbkgstr,"N_{bkg} = %.1f #pm %.1f",NbkgPass.getVal(),NbkgPass.getPropagatedError(*fitResult));
   CPlot plotPass(pname,mframePass,"","tag-probe mass [GeV]",ylabel);
@@ -1466,11 +1470,11 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
   }
   plotPass.AddTextBox(effstr,0.69,0.84,0.94,0.89,0,kBlack,42,-1);
   if(fBkgPass>0) {
-    plotPass.AddTextBox(0.69,0.68,0.94,0.83,0,kBlack,42,-1,2,nsigstr,nbkgstr);
-    //plotPass.AddTextBox(0.69,0.68,0.94,0.83,0,kBlack,42,-1,3,nsigstr,nbkgstr,chi2str);
+    //plotPass.AddTextBox(0.69,0.68,0.94,0.83,0,kBlack,42,-1,2,nsigstr,nbkgstr);
+    plotPass.AddTextBox(0.69,0.68,0.94,0.83,0,kBlack,42,-1,3,nsigstr,nbkgstr,chi2str);
   } else {
-    plotPass.AddTextBox(0.69,0.73,0.94,0.83,0,kBlack,42,-1,1,nsigstr);
-    //plotPass.AddTextBox(0.69,0.73,0.94,0.83,0,kBlack,42,-1,2,nsigstr,chi2str);
+    //plotPass.AddTextBox(0.69,0.73,0.94,0.83,0,kBlack,42,-1,1,nsigstr);
+    plotPass.AddTextBox(0.69,0.73,0.94,0.83,0,kBlack,42,-1,2,nsigstr,chi2str);
   }
   plotPass.Draw(cpass,true,"png");
  
@@ -1482,7 +1486,8 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
   sprintf(ylabel,"Events / %.1f GeV",(double)BIN_SIZE_FAIL);
   sprintf(nsigstr,"N_{sig} = %.1f #pm %.1f",NsigFail.getVal(),NsigFail.getPropagatedError(*fitResult));
   sprintf(nbkgstr,"N_{bkg} = %.1f #pm %.1f",NbkgFail.getVal(),NbkgFail.getPropagatedError(*fitResult));
-  sprintf(chi2str,"#chi^{2}/dof = %.3f",mframePass->chiSquare());
+  //sprintf(chi2str,"#chi^{2}/dof = %.3f",mframeFail->chiSquare());
+  sprintf(chi2str,"#chi^{2}/dof = %.3f",mframeFail->chiSquare("modelFail","dataFail",12));
   CPlot plotFail(pname,mframeFail,"","tag-probe mass [GeV]",ylabel);
   plotFail.AddTextBox("Failing probes",0.70,0.93,0.95,0.99,0,kBlack,62,-1);
   plotFail.AddTextBox(binlabelx,0.21,0.84,0.51,0.89,0,kBlack,42,-1);
@@ -1493,8 +1498,8 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
     plotFail.AddTextBox(yield,0.21,0.79,0.51,0.84,0,kBlack,42,-1);
   }
   plotFail.AddTextBox(effstr,0.69,0.84,0.94,0.89,0,kBlack,42,-1);  
-  plotFail.AddTextBox(0.69,0.68,0.94,0.83,0,kBlack,42,-1,2,nsigstr,nbkgstr);
-  //plotFail.AddTextBox(0.69,0.68,0.94,0.83,0,kBlack,42,-1,3,nsigstr,nbkgstr,chi2str);
+  //plotFail.AddTextBox(0.69,0.68,0.94,0.83,0,kBlack,42,-1,2,nsigstr,nbkgstr);
+  plotFail.AddTextBox(0.69,0.68,0.94,0.83,0,kBlack,42,-1,3,nsigstr,nbkgstr,chi2str);
   plotFail.Draw(cfail,true,"png");  
   
   //
