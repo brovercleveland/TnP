@@ -190,17 +190,17 @@ CQuadraticExp::CQuadraticExp(RooRealVar &m, const Bool_t pass)
 
   char a1name[50]; 
   sprintf(a1name,"a1%s",name);
-  a1 = new RooRealVar(a1name,a1name,0,-10,10.);
+  a1 = new RooRealVar(a1name,a1name,0,-20,20.);
   //a1->setConstant(kTRUE);
   
   char a2name[50]; 
   sprintf(a2name,"a2%s",name);
-  a2 = new RooRealVar(a2name,a2name,0.0,-10,10);
+  a2 = new RooRealVar(a2name,a2name,0.0,-20,20);
   //a2->setConstant(kTRUE);
   
   char tname[50];
   sprintf(tname,"t%s",name);
-  t = new RooRealVar(tname,tname,-1e-6,-10.,0.); 
+  t = new RooRealVar(tname,tname,-1e-6,-10.,2.); 
   //t->setConstant(kTRUE); 
   
   char formula[200];

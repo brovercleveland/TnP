@@ -340,6 +340,7 @@ void CEffZFitter::computeEff()
   const unsigned int NBINS_ETAPHI = NBINS_ETA*NBINS_PHI;
   const unsigned int NBINS_NPV    = fNPVBinEdgesv.size()-1;
   double ptBinEdges[fPtBinEdgesv.size()];   for(unsigned int i=0; i<fPtBinEdgesv.size();  i++) { ptBinEdges[i]  = fPtBinEdgesv[i];  }
+  double ptBinEdges2[fPtBinEdgesv.size()]; for(unsigned int i=0; i<fPtBinEdgesv.size(); i++) { ptBinEdges2[i] = fPtBinEdgesv[i];} ptBinEdges2[fPtBinEdgesv.size()-1] = 200;
   double etaBinEdges[fEtaBinEdgesv.size()]; for(unsigned int i=0; i<fEtaBinEdgesv.size(); i++) { etaBinEdges[i] = fEtaBinEdgesv[i]; }
   double phiBinEdges[fPhiBinEdgesv.size()]; for(unsigned int i=0; i<fPhiBinEdgesv.size(); i++) { phiBinEdges[i] = fPhiBinEdgesv[i]; }
   
@@ -358,7 +359,7 @@ void CEffZFitter::computeEff()
   if(fDoEta)    { grEffEta = makeEffGraph(fEtaBinEdgesv, fPassTreeEtav, fFailTreeEtav, "eta"); }
   if(fDoPhi)    { grEffPhi = makeEffGraph(fPhiBinEdgesv, fPassTreePhiv, fFailTreePhiv, "phi"); }
   if(fDoNPV)    { grEffNPV = makeEffGraph(fNPVBinEdgesv, fPassTreeNPVv, fFailTreeNPVv, "npv"); }
-  if(fDoEtaPt)  { makeEffHist2D(hEffEtaPt, hErrlEtaPt, hErrhEtaPt, fPassTreeEtaPtv, fFailTreeEtaPtv, "etapt"); cout<<"testing"<<endl;}
+  if(fDoEtaPt)  { makeEffHist2D(hEffEtaPt, hErrlEtaPt, hErrhEtaPt, fPassTreeEtaPtv, fFailTreeEtaPtv, "etapt");}
   if(fDoEtaPhi) { makeEffHist2D(hEffEtaPhi, hErrlEtaPhi, hErrhEtaPhi, fPassTreeEtaPhiv, fFailTreeEtaPhiv, "etaphi"); }
   
   //------------------------------------------------------------------------------------------------
@@ -369,11 +370,25 @@ void CEffZFitter::computeEff()
   // output ROOT file
   //
   std::string outfname = fOutputDir + std::string("/eff.root");
+  std::string etaptfname = fOutputDir + "/"+fOutputDir+"_effPlotEtaPt.png";
   TFile *outfile = new TFile(outfname.c_str(), "RECREATE");
   if(grEffPt)  grEffPt->Write();
   if(grEffEta) grEffEta->Write();
   if(grEffPhi) grEffPhi->Write();
   if(grEffNPV) grEffNPV->Write();
+  TCanvas *etaPtCan = MakeCanvas("etaPtCan","etaPtCan",720,540);
+  TH2D *etaPtPlot = new TH2D("hEffEtaPt2","",NBINS_ETA,etaBinEdges,NBINS_PT,ptBinEdges2); 
+  for (int i = 1; i<hEffEtaPt->GetNbinsX()+1; ++i){
+    for (int j = 1; j<hEffEtaPt->GetNbinsY()+1; ++j){
+      etaPtPlot->SetBinContent(i,j, hEffEtaPt->GetBinContent(i,j));
+    }
+  }
+  etaPtPlot->GetXaxis()->SetTitle("#eta");
+  etaPtPlot->GetYaxis()->SetTitle("p_{T} (GeV)");
+  etaPtCan->SetRightMargin(0.11);
+  etaPtPlot->SetMarkerSize(1.85);
+  etaPtPlot->Draw("colztext45");
+  etaPtCan->SaveAs(etaptfname.c_str());
   hEffEtaPt->Write();
   hErrlEtaPt->Write();
   hErrhEtaPt->Write();
@@ -1277,9 +1292,30 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
   CBackgroundModel *bkgModPass = 0;
   CSignalModel     *sigModFail = 0;
   CBackgroundModel *bkgModFail = 0;
+
+  if(fOutputDir.find("el_Iso_data")!=string::npos){
+    if(ibin==22) fBkgFail = 4;
+  }
   
-  if(fSigPass==1) {
+  if(fSigPass==1 || ibin == 2 || ibin == 7 || ibin==12 || ibin==17 || ibin == 22) {
     sigModPass = new CBreitWignerConvCrystalBall(m,true);
+    if(fOutputDir.find("el_ID_data") != string::npos){
+      if(ibin==7) {
+        ((CBreitWignerConvCrystalBall*)sigModPass)->mean->setVal(3);
+        ((CBreitWignerConvCrystalBall*)sigModPass)->alpha->setMin(-20);
+        ((CBreitWignerConvCrystalBall*)sigModPass)->alpha->setVal(0);
+        //((CBreitWignerConvCrystalBall*)sigModPass)->sigma->setMax(10);
+        //((CBreitWignerConvCrystalBall*)sigModPass)->sigma->setVal(0);
+      }
+    }else{
+      if(ibin==7) {
+        ((CBreitWignerConvCrystalBall*)sigModPass)->mean->setVal(3);
+        //((CBreitWignerConvCrystalBall*)sigModPass)->alpha->setMin(-20);
+        //((CBreitWignerConvCrystalBall*)sigModPass)->alpha->setVal(0);
+        //((CBreitWignerConvCrystalBall*)sigModPass)->sigma->setMax(10);
+        //((CBreitWignerConvCrystalBall*)sigModPass)->sigma->setVal(0);
+      }
+    }
   
   } else if(fSigPass==2) { 
     char hname[50];
@@ -1310,13 +1346,36 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
   
   } else if(fBkgPass==4) {
     bkgModPass = new CLinearExp(m,true);
+    /*
+    if(fOutputDir.find("el_ID_data")!=string::npos){
+      if(ibin==7 ) {
+        ((CLinearExp*)bkgModPass)->alfa->setVal(35);
+        ((CLinearExp*)bkgModPass)->alfa->setMin(30);
+      }
+    }else if (fOutputDir.find("el_Iso_data") != string::npos){
+      if(ibin==0 ) {
+        ((CLinearExp*)bkgModPass)->alfa->setVal(35);
+        ((CLinearExp*)bkgModPass)->alfa->setMin(30);
+        //((CErfcExpo*)bkgModPass)->gamma->setMin(-10);
+        //((CErfcExpo*)bkgModPass)->gamma->setVal(-5);
+      }
+    }
+  */
   
   } else if(fBkgPass==5) {
     bkgModPass = new CQuadraticExp(m,true);
   }
 
-  if(fSigFail==1) {
+  if(fSigFail==1 || ibin == 2 || ibin == 7 || ibin==12 || ibin==17 || ibin == 22) {
     sigModFail = new CBreitWignerConvCrystalBall(m,false);
+    if(fOutputDir.find("el_Iso_data")!=string::npos){
+      if (ibin == 7){
+        ((CBreitWignerConvCrystalBall*)sigModFail)->mean->setVal(3);
+        ((CBreitWignerConvCrystalBall*)sigModFail)->alpha->setMin(-20);
+        ((CBreitWignerConvCrystalBall*)sigModFail)->alpha->setVal(0);
+      }
+    }
+
   
   } else if(fSigFail==2) {
     char hname[50];
@@ -1342,8 +1401,10 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
   } else if(fBkgFail==2) {
     bkgModFail = new CErfcExpo(m,false);
     //ID and Iso
-    if(ibin==0) {
-      ((CErfcExpo*)bkgModFail)->alfa->setVal(55);
+    if(fOutputDir.find("el_ID_data")!=string::npos){
+      if(ibin==0) {
+        ((CErfcExpo*)bkgModFail)->alfa->setVal(55);
+      }
     }
     if(ibin==23 || ibin ==24) {
       ((CErfcExpo*)bkgModFail)->gamma->setMin(-1.0);
@@ -1356,6 +1417,13 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
     //if(ibin==17) {
     //  ((CErfcExpo*)bkgModFail)->alfa->setVal(61);
    // }
+    if(fOutputDir.find("el_Iso_data")!=string::npos){
+      if(ibin==7) {
+        ((CErfcExpo*)bkgModFail)->alfa->setVal(55);
+        ((CErfcExpo*)bkgModFail)->alfa->setMin(30);
+        ((CErfcExpo*)bkgModFail)->alfa->setMax(70);
+      }
+    }
 
   } else if(fBkgFail==3) {
     bkgModFail = new CDoubleExp(m,false);
@@ -1481,6 +1549,7 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
     plotPass.AddTextBox(yield,0.21,0.79,0.51,0.84,0,kBlack,42,-1);
   }
   plotPass.AddTextBox(effstr,0.69,0.84,0.94,0.89,0,kBlack,42,-1);
+  /*
   if(fBkgPass>0) {
     //plotPass.AddTextBox(0.69,0.68,0.94,0.83,0,kBlack,42,-1,2,nsigstr,nbkgstr);
     plotPass.AddTextBox(0.69,0.68,0.94,0.83,0,kBlack,42,-1,3,nsigstr,nbkgstr,chi2str);
@@ -1488,6 +1557,7 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
     //plotPass.AddTextBox(0.69,0.73,0.94,0.83,0,kBlack,42,-1,1,nsigstr);
     plotPass.AddTextBox(0.69,0.73,0.94,0.83,0,kBlack,42,-1,2,nsigstr,chi2str);
   }
+  */
   plotPass.Draw(cpass,true,"png");
  
   //
@@ -1511,7 +1581,7 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
   }
   plotFail.AddTextBox(effstr,0.69,0.84,0.94,0.89,0,kBlack,42,-1);  
   //plotFail.AddTextBox(0.69,0.68,0.94,0.83,0,kBlack,42,-1,2,nsigstr,nbkgstr);
-  plotFail.AddTextBox(0.69,0.68,0.94,0.83,0,kBlack,42,-1,3,nsigstr,nbkgstr,chi2str);
+  //plotFail.AddTextBox(0.69,0.68,0.94,0.83,0,kBlack,42,-1,3,nsigstr,nbkgstr,chi2str);
   plotFail.Draw(cfail,true,"png");  
   
   //
