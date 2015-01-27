@@ -36,9 +36,16 @@ NOOBDIR=/tthome/bpollack/CMSSW_6_1_1/src/HZG_Analyzer/HiggsZGAnalyzer/tnpFiles
 
 #./effZFit sel.bins 0 0 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_11-11-14_ID.root el_ID_MC 1 0 none 
 #./effZFit sel.bins 2 4 2 2 ${NOOBDIR}/tnpFile_EE2012ABCD_11-11-14_ID.root el_ID_data 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_11-11-14_ID.root
+
+#./effZFit sel.binsLow 0 0 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_11-11-14_ID.root el_ID_MC_low 1 0 none 
+#./effZFit sel.binsLow 2 4 2 2 ${NOOBDIR}/tnpFile_EE2012ABCD_11-11-14_ID.root el_ID_data_low 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_11-11-14_ID.root
+
 ##
 #./effZFit sel.bins 0 0 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_11-13-14_Iso.root el_Iso_MC 1 0 none 
-#./effZFit sel.bins 2 4 2 2 ${NOOBDIR}/tnpFile_EE2012ABCD_11-13-14_Iso.root el_Iso_data 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_11-13-14_Iso.root
+./effZFit sel.bins 2 4 2 2 ${NOOBDIR}/tnpFile_EE2012ABCD_11-13-14_Iso.root el_Iso_data 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_11-13-14_Iso.root
+
+#./effZFit sel.binsLow 0 0 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_11-13-14_Iso.root el_Iso_MC_low 1 0 none 
+#./effZFit sel.binsLow 2 4 2 2 ${NOOBDIR}/tnpFile_EE2012ABCD_11-13-14_Iso.root el_Iso_data_low 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_11-13-14_Iso.root
 ##
 #./effZFit sel.bins 0 0 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_12-04-14_LeadingTrigger.root el_LeadingTrigger_MC 1 0 none 
 #./effZFit sel.bins 0 0 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_12-04-14_LeadingTrigger.root el_LeadingTrigger_data 0 0 none 
@@ -47,7 +54,7 @@ NOOBDIR=/tthome/bpollack/CMSSW_6_1_1/src/HZG_Analyzer/HiggsZGAnalyzer/tnpFiles
 #./effZFit sel.bins 0 0 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_12-04-14_TrailingTrigger.root el_TrailingTrigger_data 0 0 none 
 
 #./effZFit sel.bins 0 0 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_01-15-14_ID_syst.root el_ID_MC_syst 1 0 none 
-./effZFit sel.bins 1 5 1 1 ${NOOBDIR}/tnpFile_EE2012ABCD_01-15-14_ID_syst.root el_ID_data_syst 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_01-15-14_ID_syst.root
+#./effZFit sel.bins 1 5 1 1 ${NOOBDIR}/tnpFile_EE2012ABCD_01-15-14_ID_syst.root el_ID_data_syst 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_01-15-14_ID_syst.root
 #
 #./effZFit sel.bins 0 0 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_01-15-14_Iso_syst.root el_Iso_MC_syst 1 0 none 
 #./effZFit sel.bins 1 5 1 1 ${NOOBDIR}/tnpFile_EE2012ABCD_01-15-14_Iso_syst.root el_Iso_data_syst 0 0 ${NOOBDIR}/tnpFile_EE2012ABCD_01-15-14_Iso_syst.root

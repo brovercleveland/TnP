@@ -103,7 +103,8 @@ void CEffZFitter::initialize(const std::string conf, const int sigpass, const in
   // generate templates from MC if necessary
   if(fSigPass==2 || fSigFail==2) {
     makeBinnedTemplates(temfname, charge);
-  } else if(fSigPass==4 || fSigFail==4) {
+  }
+  if(fSigPass==4 || fSigFail==4) {
     makeUnbinnedTemplates(temfname, charge);
   }
   
@@ -359,6 +360,7 @@ void CEffZFitter::computeEff()
   if(fDoEta)    { grEffEta = makeEffGraph(fEtaBinEdgesv, fPassTreeEtav, fFailTreeEtav, "eta"); }
   if(fDoPhi)    { grEffPhi = makeEffGraph(fPhiBinEdgesv, fPassTreePhiv, fFailTreePhiv, "phi"); }
   if(fDoNPV)    { grEffNPV = makeEffGraph(fNPVBinEdgesv, fPassTreeNPVv, fFailTreeNPVv, "npv"); }
+  cout<<"makeEffHist2D"<<endl;
   if(fDoEtaPt)  { makeEffHist2D(hEffEtaPt, hErrlEtaPt, hErrhEtaPt, fPassTreeEtaPtv, fFailTreeEtaPtv, "etapt");}
   if(fDoEtaPhi) { makeEffHist2D(hEffEtaPhi, hErrlEtaPhi, hErrhEtaPhi, fPassTreeEtaPhiv, fFailTreeEtaPhiv, "etaphi"); }
   
@@ -774,6 +776,7 @@ void CEffZFitter::makeUnbinnedTemplates(const std::string temfname, const int ch
   const unsigned int NBINS_PHI = fPhiBinEdgesv.size()-1;
   const unsigned int NBINS_NPV = fNPVBinEdgesv.size()-1;
   
+  /*
   TTree* passPt[NBINS_PT];
   TTree* failPt[NBINS_PT];
   for(unsigned int ibin=0; ibin<NBINS_PT; ibin++) {
@@ -785,6 +788,7 @@ void CEffZFitter::makeUnbinnedTemplates(const std::string temfname, const int ch
     failPt[ibin] = new TTree(tname,"");
     failPt[ibin]->Branch("m",&mass,"m/F");
     failPt[ibin]->SetDirectory(0);
+    cout<<"pt bin "<<ibin<<" complete"<<endl;
   }
   
   TTree* passEta[NBINS_ETA];
@@ -798,6 +802,7 @@ void CEffZFitter::makeUnbinnedTemplates(const std::string temfname, const int ch
     failEta[ibin] = new TTree(tname,"");
     failEta[ibin]->Branch("m",&mass,"m/F");
     failEta[ibin]->SetDirectory(0); 
+    cout<<"eta bin "<<ibin<<" complete"<<endl;
   }
   
   TTree* passPhi[NBINS_PHI];  
@@ -812,7 +817,7 @@ void CEffZFitter::makeUnbinnedTemplates(const std::string temfname, const int ch
     failPhi[ibin]->Branch("m",&mass,"m/F");
     failPhi[ibin]->SetDirectory(0);
   }
-    
+    */
   TTree* passEtaPt[NBINS_ETA*NBINS_PT];  
   TTree* failEtaPt[NBINS_ETA*NBINS_PT];
   for(unsigned int ibin=0; ibin<(NBINS_ETA*NBINS_PT); ibin++) {
@@ -824,8 +829,10 @@ void CEffZFitter::makeUnbinnedTemplates(const std::string temfname, const int ch
     failEtaPt[ibin] = new TTree(tname,"");
     failEtaPt[ibin]->Branch("m",&mass,"m/F");
     failEtaPt[ibin]->SetDirectory(0);
+    cout<<"eta/pt bin "<<ibin<<" complete"<<endl;
   }
   
+  /*
   TTree* passEtaPhi[NBINS_ETA*NBINS_PHI];
   TTree* failEtaPhi[NBINS_ETA*NBINS_PHI];
   for(unsigned int ibin=0; ibin<(NBINS_ETA*NBINS_PHI); ibin++) {
@@ -851,9 +858,10 @@ void CEffZFitter::makeUnbinnedTemplates(const std::string temfname, const int ch
     failNPV[ibin]->Branch("m",&mass,"m/F");
     failNPV[ibin]->SetDirectory(0);
   }    
+  */
   
   TFile *infile = new TFile(temfname.c_str());   assert(infile);
-  TTree *intree = (TTree*)infile->Get("Events"); assert(intree);
+  TTree *intree = (TTree*)infile->Get("tnpTree_DYToEE"); assert(intree);
   intree->SetBranchAddress("runNum",   &runNum);
   intree->SetBranchAddress("lumiSec",  &lumiSec);
   intree->SetBranchAddress("evtNum",   &evtNum);
@@ -896,6 +904,7 @@ void CEffZFitter::makeUnbinnedTemplates(const std::string temfname, const int ch
     }
     if(ieta<0) continue;
     
+    /*
     int iphi=-1;
     for(unsigned int ibin=0; ibin<NBINS_PHI; ibin++) {
       if(fDoAbsPhi) {
@@ -914,26 +923,28 @@ void CEffZFitter::makeUnbinnedTemplates(const std::string temfname, const int ch
       if((npv >= fNPVBinEdgesv[ibin]) && (npv < fNPVBinEdgesv[ibin+1]))
         inpv = ibin; 
     if(inpv<0) continue;
+    */
         
     if(pass) {
-      passPt[ipt]->Fill();
-      passEta[ieta]->Fill();
-      passPhi[iphi]->Fill();
+      //passPt[ipt]->Fill();
+      //passEta[ieta]->Fill();
+      //passPhi[iphi]->Fill();
       passEtaPt[ipt*NBINS_ETA + ieta]->Fill();
-      passEtaPhi[iphi*NBINS_ETA + ieta]->Fill();
-      passNPV[inpv]->Fill();
+      //passEtaPhi[iphi*NBINS_ETA + ieta]->Fill();
+      //passNPV[inpv]->Fill();
     } else {
-      failPt[ipt]->Fill();
-      failEta[ieta]->Fill();
-      failPhi[iphi]->Fill();
+      //failPt[ipt]->Fill();
+      //failEta[ieta]->Fill();
+      //failPhi[iphi]->Fill();
       failEtaPt[ipt*NBINS_ETA + ieta]->Fill();
-      failEtaPhi[iphi*NBINS_ETA + ieta]->Fill();
-      failNPV[inpv]->Fill();
+      //failEtaPhi[iphi*NBINS_ETA + ieta]->Fill();
+      //failNPV[inpv]->Fill();
     }    
   }
   infile->Close();
 
   TFile outfile("unbinnedTemplates.root", "RECREATE");
+  /*
   for(unsigned int ibin=0; ibin<NBINS_PT; ibin++) {
     passPt[ibin]->Write();
     failPt[ibin]->Write();
@@ -952,12 +963,14 @@ void CEffZFitter::makeUnbinnedTemplates(const std::string temfname, const int ch
     delete passPhi[ibin];
     delete failPhi[ibin];
   }
+  */
   for(unsigned int ibin=0; ibin<(NBINS_ETA*NBINS_PT); ibin++) {
     passEtaPt[ibin]->Write();
     failEtaPt[ibin]->Write();
     delete passEtaPt[ibin];
     delete failEtaPt[ibin];
   }
+  /*
   for(unsigned int ibin=0; ibin<(NBINS_ETA*NBINS_PHI); ibin++) {
     passEtaPhi[ibin]->Write();
     failEtaPhi[ibin]->Write();
@@ -970,6 +983,7 @@ void CEffZFitter::makeUnbinnedTemplates(const std::string temfname, const int ch
     delete passNPV[ibin];
     delete failNPV[ibin];
   }
+  */
   outfile.Write();
   outfile.Close(); 
 
@@ -1293,13 +1307,23 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
   CSignalModel     *sigModFail = 0;
   CBackgroundModel *bkgModFail = 0;
 
-  if(fOutputDir.find("el_Iso_data")!=string::npos){
-    if(ibin==22) fBkgFail = 4;
+  if(fOutputDir == "el_Iso_data" || "el_ID_data"){
+    if(ibin==2 || ibin==7 || ibin==12) fSigFail = 1;
   }
+  if(fOutputDir == "el_ID_data_low"){
+    if(ibin==1) fBkgFail = 3;
+  }
+
+  //if(fOutputDir == "el_Iso_data"){
+  //  if(ibin==2) fBkgFail = 3;
+  //}
   
-  if(fSigPass==1 || ibin == 2 || ibin == 7 || ibin==12 || ibin==17 || ibin == 22) {
+  //if(fSigPass==1 ||
+  //    ((fOutputDir == "el_ID_data" || fOutputDir == "el_Iso_data") && (ibin == 2 || ibin == 7 || ibin==12 || ibin==17 || ibin == 22))) {
+  if(fSigPass==1){
     sigModPass = new CBreitWignerConvCrystalBall(m,true);
-    if(fOutputDir.find("el_ID_data") != string::npos){
+    /*
+    if(fOutputDir == "el_ID_data"){
       if(ibin==7) {
         ((CBreitWignerConvCrystalBall*)sigModPass)->mean->setVal(3);
         ((CBreitWignerConvCrystalBall*)sigModPass)->alpha->setMin(-20);
@@ -1316,6 +1340,7 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
         //((CBreitWignerConvCrystalBall*)sigModPass)->sigma->setVal(0);
       }
     }
+    */
   
   } else if(fSigPass==2) { 
     char hname[50];
@@ -1366,13 +1391,15 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
     bkgModPass = new CQuadraticExp(m,true);
   }
 
-  if(fSigFail==1 || ibin == 2 || ibin == 7 || ibin==12 || ibin==17 || ibin == 22) {
+  //if(fSigFail==1 ||
+  //    ((fOutputDir == "el_ID_data" || fOutputDir == "el_Iso_data") && (ibin == 2 || ibin == 7 || ibin==12 || ibin==17 || ibin == 22))) {
+  if(fSigFail==1){
     sigModFail = new CBreitWignerConvCrystalBall(m,false);
-    if(fOutputDir.find("el_Iso_data")!=string::npos){
-      if (ibin == 7){
-        ((CBreitWignerConvCrystalBall*)sigModFail)->mean->setVal(3);
-        ((CBreitWignerConvCrystalBall*)sigModFail)->alpha->setMin(-20);
-        ((CBreitWignerConvCrystalBall*)sigModFail)->alpha->setVal(0);
+    if (fOutputDir == "el_Iso_data"){
+      if (ibin == 2){
+        ((CBreitWignerConvCrystalBall*)sigModFail)->sigma->setMax(10);
+        ((CBreitWignerConvCrystalBall*)sigModFail)->sigma->setVal(5);
+        ((CBreitWignerConvCrystalBall*)sigModFail)->mean->setMin(-20);
       }
     }
 
@@ -1383,16 +1410,24 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
     TH1D *h = (TH1D*)histfile->Get(hname);
     assert(h);
     sigModFail = new CMCTemplateConvGaussian(m,h,false);//,((CMCTemplateConvGaussian*)sigPass)->sigma);
+    if(fOutputDir=="el_ID_data"){
+      if(ibin==2) {
+        ((CMCTemplateConvGaussian*)sigModFail)->sigma->setMax(0.75);
+        ((CMCTemplateConvGaussian*)sigModFail)->sigma->setVal(0.01);
+      }
+    }
 
   } else if(fSigFail==3) {
     sigModFail = new CVoigtianCBShape(m,false);
   
   } else if(fSigFail==4) {
+    cout<<"making unbinned template"<<endl;
     char tname[50];
     sprintf(tname,"fail%s_%i",name.c_str(),ibin);
     TTree *t = (TTree*)datfile->Get(tname);
     assert(t);
     sigModFail = new CMCDatasetConvGaussian(m,t,false);
+    cout<<"unbinned template ready"<<endl;
   }
 
   if(fBkgFail==1) { 
@@ -1400,11 +1435,21 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
   
   } else if(fBkgFail==2) {
     bkgModFail = new CErfcExpo(m,false);
-    //ID and Iso
-    if(fOutputDir.find("el_ID_data")!=string::npos){
+    //ID 
+    if(fOutputDir=="el_ID_data"){
       if(ibin==0) {
         ((CErfcExpo*)bkgModFail)->alfa->setVal(55);
       }
+      else if(ibin==1) {
+        ((CErfcExpo*)bkgModFail)->alfa->setMin(40);
+        ((CErfcExpo*)bkgModFail)->alfa->setVal(50);
+      }
+      else if(ibin==2 || ibin==7 || ibin==12) {
+        ((CErfcExpo*)bkgModFail)->alfa->setMin(40);
+        ((CErfcExpo*)bkgModFail)->alfa->setVal(60);
+        ((CErfcExpo*)bkgModFail)->alfa->setMax(70);
+      }
+
     }
     if(ibin==23 || ibin ==24) {
       ((CErfcExpo*)bkgModFail)->gamma->setMin(-1.0);
@@ -1417,11 +1462,29 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
     //if(ibin==17) {
     //  ((CErfcExpo*)bkgModFail)->alfa->setVal(61);
    // }
-    if(fOutputDir.find("el_Iso_data")!=string::npos){
-      if(ibin==7) {
-        ((CErfcExpo*)bkgModFail)->alfa->setVal(55);
-        ((CErfcExpo*)bkgModFail)->alfa->setMin(30);
+    if(fOutputDir == "el_Iso_data"){
+      if(ibin==7 || ibin==12) {
+        ((CErfcExpo*)bkgModFail)->alfa->setVal(40);
+        ((CErfcExpo*)bkgModFail)->alfa->setMin(60);
         ((CErfcExpo*)bkgModFail)->alfa->setMax(70);
+      }
+      else if (ibin == 2){
+        ((CErfcExpo*)bkgModFail)->alfa->setVal(50);
+        ((CErfcExpo*)bkgModFail)->alfa->setMin(30);
+        ((CErfcExpo*)bkgModFail)->alfa->setMax(65);
+      }
+
+    }
+    if(fOutputDir=="el_ID_data_low"){
+      if(ibin==1) {
+        ((CErfcExpo*)bkgModFail)->alfa->setVal(40);
+        ((CErfcExpo*)bkgModFail)->alfa->setMin(30);
+        ((CErfcExpo*)bkgModFail)->alfa->setMax(55);
+        ((CErfcExpo*)bkgModFail)->beta->setVal(0.3);
+        ((CErfcExpo*)bkgModFail)->beta->setMax(0.5);
+        //((CErfcExpo*)bkgModFail)->alfa->setVal(45);
+        //((CErfcExpo*)bkgModFail)->gamma->setMin(0.1);
+        ((CErfcExpo*)bkgModFail)->gamma->setVal(0.9);
       }
     }
 
@@ -1473,6 +1536,7 @@ void CEffZFitter::performFit(double &resEff, double &resErrl, double &resErrh,
   totalPdf.addPdf(*modelFail,"Fail");
 
   RooFitResult *fitResult=0;
+  cout<<"fitting"<<endl;
   fitResult = totalPdf.fitTo(*dataCombined,
                              RooFit::Extended(),
                              RooFit::Strategy(2),
